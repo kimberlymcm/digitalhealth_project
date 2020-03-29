@@ -12,6 +12,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
+# This code is available at:
+# https://github.com/kimberlymcm/algorithm_practice/blob/master/weather_data_explorations/src/baum_welch_alg.py
 sys.path.append(
     "/Users/kmcmanus/Documents/classes/algorithm_practice/weather_data_explorations/src")
 

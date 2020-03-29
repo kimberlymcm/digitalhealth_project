@@ -1,3 +1,8 @@
+# Kimberly added
+src/tf_logs/*
+data/hmm_tf_logs/*
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
