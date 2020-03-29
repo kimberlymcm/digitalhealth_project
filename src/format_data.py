@@ -1,4 +1,4 @@
-""" Convert raw fitbit jsons to formats more ammenable to working with """
+''' Convert raw fitbit jsons to formats more ammenable to working with '''
 
 import argparse
 import glob
@@ -40,7 +40,6 @@ def add_fitbit_sleep_assignments(fn, df):
             Returns:
                     df (pd.DataFrame): Dataframe with bpm, confidence, datetime, and sleep state
     '''
-    df["fb_sleep"] = 1  # Missing data
     value_dict = {'wake': 1, 'light': 0, 'deep': -1, 'rem': -2}
     with open(fn) as f:
         fitbit_sleep = json.load(f)
@@ -63,12 +62,21 @@ def main(args):
     frames = [create_heart_rate_df(fn) for fn in hr_files]
     df = pd.concat(frames)
     df.sort_values(by="datetime", inplace=True)
+    print('Raw rows: {}'.format(df.shape[0]))
+
+    # Take just first reading per minute
+    df = df.resample('1Min').first()
+    df["datetime"] = df.index
+    print('Resampled rows (1Min): {}'.format(df.shape[0]))
+
+    df["fb_sleep"] = 1  # Missing data
     pattern_match_sleep = args.in_dir + "/sleep*json"
     sleep_files = glob.glob(pattern_match_sleep)
+    print(sleep_files)
 
     for sleep_fn in sleep_files:
         df = add_fitbit_sleep_assignments(sleep_fn, df)
-    out_fn = args.out_dir + "/20200308_hr_sleep.csv"
+    out_fn = args.out_dir + "/20200308_hr_sleep_1min_first.csv"
     df.to_csv(out_fn)
 
 
