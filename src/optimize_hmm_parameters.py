@@ -35,13 +35,14 @@ def run_random_start(args, observations):
                                                float(observ_mean_start_two[0])],
                                           scale=[float(observ_stdev_start[0]),
                                                  float(observ_stdev_start[1])])
-    print(transition_distribution.probs_parameter())
-    print(observation_distribution.mean())
-    print(observation_distribution.stddev())
 
     logdir = "{}/run_t_{}_{}_obmean_{}_{}_obstd_{}_{}".format(args.out_dir,
-                                                              trans_start[0], trans_start[1], observ_mean_start_one, observ_mean_start_two,
-                                                              observ_stdev_start[0], observ_stdev_start[1])
+                                                              trans_start[0],
+                                                              trans_start[1],
+                                                              observ_mean_start_one,
+                                                              observ_mean_start_two,
+                                                              observ_stdev_start[0],
+                                                              observ_stdev_start[1])
 
     model = BaumWelch(initial_distribution=initial_distribution,
                       observation_distribution=observation_distribution,
