@@ -1,6 +1,7 @@
 # Kimberly added
 src/tf_logs/*
 data/hmm_tf_logs/*
+digital_health_venv/*
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
