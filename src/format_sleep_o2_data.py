@@ -24,6 +24,39 @@ def read_files(files):
     return all_df
 
 
+def identify_odi(x):
+    """ Identify intervals that count an an ODI.
+    Input: list of SpO2 values
+    Output: value, np.nan: missing data, 1: ODI event, 0: no ODI event
+    """
+    if len(x) < 2:
+        return np.nan
+    if x.max() <= 91.0:
+        return 1
+    return 0
+
+
+def assign_odi(df):
+    """ Read in df, create a new column that assigns an 'ODI' event.
+    The position data isn't relevant for this call.
+    An 'ODI' event is typically defined as a drop of ~4% from baseline
+    for at least 10 seconds (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6017211/).
+    Based on the data available, I'm going to call an ODI event to be
+    when SpO2 dropped to <= 91% for at least 2 consecutive measurements.
+    Note that the time frequency returns the BEGINNING of the interval
+
+    Arguments: 
+        Input: Dataframe of O2 data
+        Returns: Same dataframe with additional ODI column
+    """
+    gpy = df["SpO2(%)"].groupby(pd.Grouper(level="datetime", freq="10S"))
+    odi = gpy.transform(identify_odi).reset_index().rename(columns={"SpO2(%)": "ODI"})
+    df_odi = pd.merge(df, odi, on="datetime", how="left")
+    df_odi = df_odi.set_index("datetime")
+    print(df_odi.head())
+    return df_odi
+
+
 def assign_sleep_night(df):
     """ Since nights span two dates, create a new column that assigns
         a 'sleep night' to be the date the night starts on
@@ -36,7 +69,7 @@ def assign_sleep_night(df):
     for i in range(0, len(dates)-1):
         start = pd.to_datetime("{} 17:00:00".format(dates[i]))
         if i < len(dates)-2:
-            end = pd.to_datetime("{} 16:00:00".format(dates[i+1]))
+            end = pd.to_datetime("{} 16:59:59".format(dates[i+1]))
             df.loc[start:end, "sleep_night"] = dates[i]
         else:
             df.loc[df.index > start, "sleep_night"] = dates[i]
@@ -87,20 +120,23 @@ def format_o2(o2_folder):
     o2_df.index = o2_df["datetime"]
     o2_df = o2_df.drop(["datetime", "Time"], axis=1)
     o2_df = o2_df.sort_index()
-    o2_df = o2_df.resample("5S").first()
-    print("SpO2 lines after resampling (5S): {}".format(o2_df.shape[0]))
-    return o2_df
+
+    o2_odi_df = assign_odi(o2_df)
+
+    o2_odi_df = o2_odi_df.resample("5S").first()
+    print("SpO2 lines after resampling (5S): {}".format(o2_odi_df.shape[0]))
+    return o2_odi_df
 
 
 @click.command()
 @click.option("--sleep_pos_folder", help="File with sleep position data.",
-	default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/sleep_position")
+    default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/sleep_position")
 @click.option("--o2_folder", help="Folder with Wellue records",
     default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/wellvue_o2_data")
 @click.option("--out_filename", help="Output filename",
-	default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/formatted_data/20200526_sleep_pos_5S.csv")
+    default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/formatted_data/20200628_sleep_pos_5S.csv")
 def main(sleep_pos_folder, o2_folder, out_filename):
-    """ hi """
+
     pos_df = format_sleep_pos(sleep_pos_folder)
 
     o2_df = format_o2(o2_folder)

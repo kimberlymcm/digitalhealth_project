@@ -57,11 +57,11 @@ def add_timing_info(df):
 @click.option(
     "--in_file",
     help="File with merged sleep data (from format_sleep_o2_data.py.",
-    default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/formatted_data/20200526_sleep_pos_5S.csv")
+    default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/formatted_data/20200628_sleep_pos_5S.csv")
 @click.option(
     "--out_file",
     help="Outfile name",
-    default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/formatted_data/20200526_sleep_pos_5S_cleaned.csv")
+    default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/formatted_data/20200628_sleep_pos_5S_cleaned.csv")
 def main(in_file, out_file):
     df = pd.read_csv(
         in_file,
@@ -69,7 +69,8 @@ def main(in_file, out_file):
         parse_dates=True,
         infer_datetime_format=True)
 
-    df_subset = df.dropna()  # Drop any rows that don't have both measurements
+    #df_subset = df.dropna()  # Drop any rows that don't have both measurements
+    df_subset = df[~df["SpO2(%)"].isna()] # Drop any rows that don't have at least oxygen data
     print(df_subset.head())
     df_subset = add_orient_oxy_bin(df_subset)
     df_subset = add_timing_info(df_subset)
