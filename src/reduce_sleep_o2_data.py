@@ -50,7 +50,11 @@ def add_timing_info(df):
     df["complete_night"] = 0
     df.loc[df["sleep_night"].isin(df_num_to_use.index), "complete_night"] = 1
 
+    # Counts number of time points since position started
+    df["time_since_pos_start"] = df.groupby(["sleep_night", (df["orient_bin"] != df["orient_bin"].shift()).cumsum()]).cumcount() + 1
+
     return df
+
 
 
 @click.command()

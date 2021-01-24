@@ -51,6 +51,7 @@ def add_fitbit_sleep_assignments(fn, df):
             value_to_use = value_dict[my_dict['level']]
             df.loc[(df['datetime'] > start) & (
                 df['datetime'] <= end), "fb_sleep"] = value_to_use
+    fitbit_sleep['minutesAsleep']
     return(df)
 
 
@@ -76,7 +77,7 @@ def main(args):
 
     for sleep_fn in sleep_files:
         df = add_fitbit_sleep_assignments(sleep_fn, df)
-    out_fn = args.out_dir + "/20200308_hr_sleep_1min_first.csv"
+    out_fn = args.out_dir + "/20201229_hr_sleep_1min_first.csv"
     df.to_csv(out_fn)
 
 
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--in_dir",
         help="Input directory with heart rate data",
-        default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/data_dump/user-site-export")
+        default="/Users/kmcmanus/Documents/classes/digitalhealth_project/data/data_dump/MyFitbitData_Dec2020/KimberlyMcManus/PhysicalActivity")
     parser.add_argument(
         "--out_dir",
         help="Output directory with heart rate data",
