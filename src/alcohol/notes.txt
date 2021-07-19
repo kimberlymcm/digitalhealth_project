@@ -1,0 +1,6 @@
+# 2021-07-18
+# Got the API working, though the workflow isn't very smooth.
+# A key is that to get intraday fitbit numbers you have to use a 'personal' application type or
+# get a special request
+# First run: python3 authorize_fitbit.py
+# Then run: python3 extract_fitbit_data.py
