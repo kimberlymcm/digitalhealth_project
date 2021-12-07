@@ -17,22 +17,34 @@ with open("/Users/kmcmanus/Documents/classes/digitalhealth_project/data/keys/tem
 
 from api import Fitbit
 okk = Fitbit(client_id=client_id, client_secret=client_secret,
-	access_token=access_token,
-	refresh_token=refresh_token,
-	expires_at=expires_at)
+    access_token=access_token,
+    refresh_token=refresh_token,
+    expires_at=expires_at)
 
-
+# Get minute-by-minute heart rate
 dates = pd.date_range(start='2021-03-08', end='2021-06-09')
 final_df = pd.DataFrame(columns = ['time', 'value', 'date'])
 for date in dates:
-	result = okk.intraday_time_series('activities/heart',
-		base_date=date, detail_level='1min',
-		start_time=None, end_time=None)
+    result = okk.intraday_time_series('activities/heart',
+        base_date=date, detail_level='1min',
+        start_time=None, end_time=None)
 
-	df_nested_list = pd.json_normalize(result['activities-heart-intraday'], record_path =['dataset'])
-	df_nested_list["date"] = date
-	final_df.append(df_nested_list)
-	time.sleep(3)
-
+    df_nested_list = pd.json_normalize(result['activities-heart-intraday'], record_path =['dataset'])
+    df_nested_list["date"] = date
+    final_df = final_df.append(df_nested_list)
+    time.sleep(3)
 
 final_df.to_csv("/Users/kmcmanus/Documents/classes/digitalhealth_project/data/alcohol/hr_data_20210308_20210609_1min.csv")
+
+# Get daily resting heart rate
+resting_hr_df = pd.DataFrame(columns = ['time', 'value', 'date'])
+result_hr = okk.time_series('activities/heart', period='7d', base_date=date)
+print(result_hr)
+
+hr_df = pd.json_normalize(result_hr['activities-heart'])
+hr_df.rename(columns={'dateTime': 'date',
+    'value.restingHeartRate': 'restingHeartRate'}, inplace=True)
+hr_df.drop(columns=['value.customHeartRateZones',
+        'value.heartRateZones'], inplace=True)
+hr_df.to_csv("/Users/kmcmanus/Documents/classes/digitalhealth_project/data/alcohol/hr_data_20210308_6m_restinghr.csv")
+
